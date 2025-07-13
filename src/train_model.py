@@ -37,7 +37,7 @@ def process_data(dataframe, tokenizer, max_len=256):
         'Staf': 8
     }
 
-    sentiment_map = { # Renaming to sentiment_map for consistency within this function
+    sentiment_map = { 
         0: 0,
         1: 1 
     }
@@ -94,8 +94,7 @@ try:
     print("Data training berhasil dimuat")
 except FileNotFoundError:
     print("Error: File 'Aspect_Based.csv' tidak ditemukan.")
-    df_train = None # Set df_train to None if file not found
-
+    df_train = None 
 
 tokenizer = AutoTokenizer.from_pretrained("indobenchmark/indobert-base-p2")
 
@@ -129,9 +128,9 @@ def process_absa_data(dataframe, tokenizer, aspect_map, sentiment_map_int_to_lab
     sentiment_labels = [] # Store sentiment labels (integers)
 
     for index, row in dataframe.iterrows():
-        text = str(row['Review']) # Ensure text is string
-        aspect_list = str(row['Aspect']).split(',') # Split aspects (handle potential NaN as string)
-        sentiment = int(row['Sentiment']) # Ensure sentiment is integer
+        text = str(row['Review']) 
+        aspect_list = str(row['Aspect']).split(',') 
+        sentiment = int(row['Sentiment']) 
 
         encoded = tokenizer.encode_plus(
             text,
@@ -149,7 +148,7 @@ def process_absa_data(dataframe, tokenizer, aspect_map, sentiment_map_int_to_lab
         if aspect_list and aspect_list[0].strip() in aspect_map:
              aspect_ids.append(aspect_map[aspect_list[0].strip()])
         else:
-             aspect_ids.append(-1) # Use -1 for unknown or missing aspects
+             aspect_ids.append(-1) 
 
         sentiment_labels.append(sentiment)
 
@@ -184,7 +183,7 @@ if df_train is not None:
     total_size = len(dataset)
     train_size = int(0.7 * total_size)
     val_size = int(0.15 * total_size)
-    test_size = total_size - train_size - val_size # Ensure all samples are included
+    test_size = total_size - train_size - val_size 
 
     # Split data
     train_dataset, val_dataset, test_dataset = random_split(dataset, [train_size, val_size, test_size])
@@ -215,7 +214,7 @@ class IndoBERTABSA(BertPreTrainedModel):
             attention_mask=attention_mask,
             token_type_ids=token_type_ids,
         )
-        pooled_output = outputs[1] # Use pooled output for classification
+        pooled_output = outputs[1] 
 
         pooled_output = self.dropout(pooled_output)
 
@@ -246,51 +245,37 @@ print("Custom IndoBERT ABSA model instantiated.")
 print(f"Number of aspect labels in model: {absa_model.num_aspect_labels}")
 print(f"Number of sentiment labels in model: {absa_model.num_sentiment_labels}")
 
-
-
-
-# Define a function to compute metrics (moved here to be used in TrainingArguments)
+# Mendefine fungsi untuk menghitung metriks 
 def compute_metrics(eval_pred):
-    # eval_pred is a tuple: (predictions, labels)
-    # In our case, predictions will be (aspect_logits, sentiment_logits)
-    # and labels will be (aspect_labels, sentiment_labels)
     aspect_logits, sentiment_logits = eval_pred.predictions
     aspect_labels, sentiment_labels = eval_pred.label_ids
 
-    # Get the predicted class indices by taking the argmax
     aspect_predictions = np.argmax(aspect_logits, axis=1)
     sentiment_predictions = np.argmax(sentiment_logits, axis=1)
 
-
-    # --- Compute metrics for Aspect Prediction ---
-    # Filter out invalid aspect labels (-1) if they exist
     valid_aspect_indices = (aspect_labels != -1)
     valid_aspect_labels = aspect_labels[valid_aspect_indices]
     valid_aspect_predictions = aspect_predictions[valid_aspect_indices]
 
 
     aspect_accuracy = accuracy_score(valid_aspect_labels, valid_aspect_predictions)
-    # Use zero_division=0 to handle cases where there are no predictions for a class
     aspect_precision, aspect_recall, aspect_f1, _ = precision_recall_fscore_support(
         valid_aspect_labels,
         valid_aspect_predictions,
-        average='weighted', # Use weighted average for imbalanced classes
+        average='weighted', 
         zero_division=0
     )
 
-    # --- Compute metrics for Sentiment Prediction ---
-    # Filter out invalid sentiment labels (-1) if they exist
     valid_sentiment_indices = (sentiment_labels != -1)
     valid_sentiment_labels = sentiment_labels[valid_sentiment_indices]
     valid_sentiment_predictions = sentiment_predictions[valid_sentiment_indices]
 
 
     sentiment_accuracy = accuracy_score(valid_sentiment_labels, valid_sentiment_predictions)
-    # Use zero_division=0 to handle cases where there are no predictions for a class
     sentiment_precision, sentiment_recall, sentiment_f1, _ = precision_recall_fscore_support(
         valid_sentiment_labels,
         valid_sentiment_predictions,
-        average='weighted', # Use weighted average for imbalanced classes
+        average='weighted',
         zero_division=0
     )
 
@@ -383,14 +368,13 @@ def compute_metrics(eval_pred):
     aspect_precision, aspect_recall, aspect_f1, _ = precision_recall_fscore_support(
         valid_aspect_labels,
         valid_aspect_predictions,
-        average='weighted', # Use weighted average for imbalanced classes
+        average='weighted', 
         zero_division=0
     )
 
     valid_sentiment_indices = (sentiment_labels != -1)
     valid_sentiment_labels = sentiment_labels[valid_sentiment_indices]
     valid_sentiment_predictions = sentiment_predictions[valid_sentiment_indices]
-
 
     sentiment_accuracy = accuracy_score(valid_sentiment_labels, valid_sentiment_predictions)
     sentiment_precision, sentiment_recall, sentiment_f1, _ = precision_recall_fscore_support(
@@ -413,7 +397,7 @@ def compute_metrics(eval_pred):
 
 # Evaluasi model pada test dataset
 print("Evaluating model on the test dataset...")
-eval_results = trainer.evaluate(eval_dataset=test_dataset) # compute_metrics is already passed to Trainer
+eval_results = trainer.evaluate(eval_dataset=test_dataset) 
 
 # Print hasil evaluasi
 print("\nHasil Evaluasi:")
