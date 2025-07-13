@@ -5,21 +5,25 @@ pip install torch
 pip install transformers 
 pip install pandas nltk
 pip install nltk
+pip install emoji
 
 import torch
 from transformers import BertTokenizer
 import pandas as pd
 import re
+import nltk
+import nltk
+import torch
+import emoji
+
+
+from deep_translator import GoogleTranslator
+from langdetect import detect
+from torch.utils.data import Dataset
+from transformers import pipeline
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.stem import PorterStemmer
-import nltk
-from deep_translator import GoogleTranslator
-from langdetect import detect
-import nltk
-import torch
-from torch.utils.data import Dataset
-from transformers import pipeline
 
 nltk.download('punkt')
 nltk.download('stopwords')
@@ -125,23 +129,39 @@ else:
 print(df.head(10))
 
 # Fungsi preprocessing
-def preprocess_text(text):
-    text = text.lower()  # Lowercase
-    text = re.sub(r'[^a-zA-Z\s]', '', text)  # Hapus angka & tanda baca
-    # Download 'punkt_tab' resource if it hasn't been downloaded yet
-    try:
-        word_tokenize("test") # Try to tokenize a test string to check if resource is available
-    except LookupError:
-        nltk.download('punkt_tab') # Download the resource if it's not found
-    tokens = word_tokenize(text)  # Tokenisasi
-    stop_words = set(stopwords.words('english'))  # Stopwords English
-    tokens = [word for word in tokens if word not in stop_words]  # Filter stopwords
-    stemmer = PorterStemmer()  # Stemming
-    tokens = [stemmer.stem(word) for word in tokens]  # Stem tiap kata
-    return ' '.join(tokens)  # Gabung kembali jadi string
+def clean_text(text):
+    # 1. Hapus semua emoji Unicode (termasuk emoticon, simbol, bendera)
+    emoji_pattern = re.compile(
+        "["
+        "\U0001F600-\U0001F64F"  # emoticons
+        "\U0001F300-\U0001F5FF"  # symbols & pictographs
+        "\U0001F680-\U0001F6FF"  # transport & map symbols
+        "\U0001F700-\U0001F77F"  # alchemical symbols
+        "\U0001F780-\U0001F7FF"  # Geometric Shapes Extended
+        "\U0001F800-\U0001F8FF"  # Supplemental Arrows-C
+        "\U0001F900-\U0001F9FF"  # Supplemental Symbols and Pictographs
+        "\U0001FA00-\U0001FA6F"  # Chess Symbols
+        "\U0001FA70-\U0001FAFF"  # Symbols and Pictographs Extended-A
+        "\U00002702-\U000027B0"  # Dingbats
+        "\U000024C2-\U0001F251"
+        "]+",
+        flags=re.UNICODE,
+    )
+    text = emoji_pattern.sub("", text)
 
-# REPLACE langsung kolom "Review" dengan data yang sudah diproses
-df["Review_English"] = df["Review_English"].apply(preprocess_text)
+    # 2. Hapus emoji dalam format :emoji_name: 
+    text = re.sub(r":(.*?):", lambda x: x.group(1).replace("_", " "), text)
+
+    # 3. Hapus enter dan spasi berlebih
+    text = text.replace("\n", " ").replace("\r", " ")
+    text = " ".join(text.split())  # Normalisasi spasi
+
+    # 4. Hapus karakter khusus, tapi pertahankan tanda baca dasar
+    text = re.sub(r'[^\w\s.,!?\'"-]', "", text)
+
+    return text.strip()
+
+df["Review_Clean"] = df["Review_Bahasa"].apply(clean_text)
 
 # Cek hasil
 print(df.head(10))
