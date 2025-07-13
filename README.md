@@ -8,4 +8,4 @@ Proyek ini bertujuan untuk mengklasifikasikan sentimen (positif, negatif) dan as
 
 ## Struktur Folder
 
-Proyek ini mengikuti struktur direktori standar untuk proyek machine learning:
+Proyek ini mengikuti struktur direktori standar untuk proyek machine learning
