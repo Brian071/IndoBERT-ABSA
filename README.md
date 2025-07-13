@@ -4,7 +4,7 @@ Repositori ini berisi kode dan sumber daya untuk melakukan Analisis Sentimen Ber
 
 ## Deskripsi Proyek
 
-Proyek ini bertujuan untuk mengklasifikasikan sentimen (positif, negatif, netral) terhadap aspek-aspek spesifik dalam review Hotel
+Proyek ini bertujuan untuk mengklasifikasikan sentimen (positif, negatif) dan aspek-aspek spesifik dalam review Hotel (Kamar, Staff, Layanan, Hotel, Kolam Renang, Harga, Sarapan, Fasilitas & Lokasi
 
 ## Struktur Folder
 
