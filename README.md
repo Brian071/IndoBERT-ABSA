@@ -9,25 +9,4 @@ Proyek ini bertujuan untuk mengklasifikasikan sentimen (positif, negatif) dan as
 ## Struktur Folder
 
 Proyek ini mengikuti struktur direktori standar untuk proyek machine learning
-ASBA-Project/
-├── README.md
-├── requirements.txt
-├── config.yaml
-├── data/
-│   ├── raw/
-│   ├── processed/
-│   └── aspect_labels.csv
-├── notebooks/
-│   ├── eda.ipynb
-│   ├── preprocessing.ipynb
-│   └── modeling.ipynb
-├── src/
-│   ├── __init__.py
-│   ├── preprocessing.py
-│   ├── model.py
-│   └── utils.py
-├── outputs/
-│   ├── metrics.txt
-│   └── plots/
-├── .gitignore
-└── LICENSE
+
